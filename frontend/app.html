@@ -91,22 +91,34 @@
 
 
     <main class="main-container">
-        <section class="news-container">
-            <div>
-                <h2>TITLE</h2>
-                <p>
-                    Ingressi
-                </p>
-            </div>
-        </section>
-
-        <section class="news-container">
-            <div>
-                <h2>TITLE</h2>
-                <p>
-                    Ingressi
-                </p>
-            </div>
-        </section>
+       
+    
 
 </body>
+<script>
+window.onload = function() {
+    fetch('http://localhost:3000/rss')
+        .then(response => response.json())
+        .then(data => {
+            const mainContainer = document.querySelector('.main-container');
+            data.forEach(item => {
+                const section = document.createElement('section');
+                section.className = 'news-container';
+
+                const div = document.createElement('div');
+
+                const h2 = document.createElement('h2');
+                h2.textContent = item.title;
+
+                const p = document.createElement('p');
+                p.textContent = item.contentSnippet || item.content || '';
+
+                div.appendChild(h2);
+                div.appendChild(p);
+                section.appendChild(div);
+                mainContainer.appendChild(section);
+            });
+        })
+        .catch(error => console.error('Error:', error));
+};
+</script>
