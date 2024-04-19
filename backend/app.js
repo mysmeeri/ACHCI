@@ -7,7 +7,7 @@ const parser = new Parser();
 app.use(cors());
 
 app.get('/rss', async (req, res) => {
-    let feed = await parser.parseURL('https://www.iltalehti.fi/rss/viihde.xml');
+    let feed = await parser.parseURL('https://search.cnbc.com/rs/search/combinedcms/view.xml?partnerId=wrss01&id=100727362');
     res.json(feed.items);
 });
 

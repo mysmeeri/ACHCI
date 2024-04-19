@@ -59,8 +59,7 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            width: 40%;
-            /* Adjust as needed */
+            width: 50%;
             margin: 20px auto;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
         }
@@ -122,3 +121,51 @@ window.onload = function() {
         .catch(error => console.error('Error:', error));
 };
 </script>
+
+<script>
+    window.onload = function() {
+        fetch('http://localhost:3000/rss')
+            .then(response => response.json())
+            .then(data => {
+                const mainContainer = document.querySelector('.main-container');
+                const voices = window.speechSynthesis.getVoices();
+    
+                data.forEach((item, index) => {
+                    const section = document.createElement('section');
+                    section.className = 'news-container';
+    
+                    const div = document.createElement('div');
+    
+                    const h2 = document.createElement('h2');
+                    h2.textContent = item.title;
+    
+                    const p = document.createElement('p');
+                    p.textContent = item.contentSnippet || item.content || '';
+    
+                    const button = document.createElement('button');
+                    button.textContent = 'Kuuntele';
+                    button.onclick = function() {
+                        const utterance1 = new SpeechSynthesisUtterance(item.title);
+                        const utterance2 = new SpeechSynthesisUtterance(item.contentSnippet || item.content || '');
+                        // Valitse ääni; tässä esimerkissä valitaan äänet perustuen indeksiin modulo 4
+
+                        utterance2.voice = voices[index % 4];
+                        speechSynthesis.speak(utterance1)
+                        
+                        utterance1.voice = voices[index % 4]; // Vaihda ääntä jokaiselle uutiselle
+                        speechSynthesis.speak(utterance2);
+                        
+                    };
+    
+                    div.appendChild(h2);
+                    div.appendChild(p);
+                    div.appendChild(button);
+                    section.appendChild(div);
+                    mainContainer.appendChild(section);
+                });
+            })
+            .catch(error => console.error('Error:', error));
+    };
+    </script>
+
+
