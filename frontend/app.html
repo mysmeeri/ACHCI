@@ -74,11 +74,13 @@
 </head>
 
 <body>
+
     <div class="header-container">
         <div class="logo-admin">
             <h1>SERVER NEWS</h1>
 
         </div>
+
 
         <ul class="navigation">
             <li><a href="">WHAT'S NEW</a></li>
@@ -89,74 +91,136 @@
     </div>
 
 
+
     <main class="main-container">
-       
-    
+
+
+        <div class="news-container">
+            <h2>Choose a voice type:</h2>
+
+            <div id="voiceOptions"> </div>
+            <br>
+            <button onclick=tallenna_aani()>Save</button>
+        </div>
+
+        </div>
+
+
+
 
 </body>
+
 <script>
-window.onload = function() {
-    fetch('http://localhost:3000/rss')
-        .then(response => response.json())
-        .then(data => {
-            const mainContainer = document.querySelector('.main-container');
-            data.forEach(item => {
-                const section = document.createElement('section');
-                section.className = 'news-container';
+    //tämä funktio tekee radiobuttonit uutisten päälle
+    function populateVoiceOptions() {
+        var voices = speechSynthesis.getVoices();
+        var voiceOptionsContainer = document.getElementById('voiceOptions');
+        voiceOptionsContainer.innerHTML = ''; // Clear previous options
 
-                const div = document.createElement('div');
+        voices.forEach(voice => {
+            // Check for specific voice names
+            if (voice.name === "Microsoft Mark - English (United States)" || voice.name === "Microsoft Zira - English (United States)") {
+                var label = document.createElement('label');
+                var radioInput = document.createElement('input');
+                radioInput.type = 'radio';
+                radioInput.id = voice.name;
+                radioInput.name = 'voiceOption';
+                radioInput.value = voice.name;
 
-                const h2 = document.createElement('h2');
-                h2.textContent = item.title;
+                label.htmlFor = radioInput.id;
+                if (voice.name.includes("Mark")) {
+                    label.textContent = "Male voice"
+                }
+                if (voice.name.includes("Zira")) {
+                    label.textContent = "Female voice";
+                }
 
-                const p = document.createElement('p');
-                p.textContent = item.contentSnippet || item.content || '';
+                voiceOptionsContainer.appendChild(radioInput);
+                voiceOptionsContainer.appendChild(label);
+                voiceOptionsContainer.appendChild(document.createElement('br'));
+            }
+        });
+    }
 
-                div.appendChild(h2);
-                div.appendChild(p);
-                section.appendChild(div);
-                mainContainer.appendChild(section);
-            });
-        })
-        .catch(error => console.error('Error:', error));
-};
+    // Use the onvoiceschanged event to populate options
+    speechSynthesis.onvoiceschanged = populateVoiceOptions;
+
+    // Populate immediately if voices are already loaded
+    if (speechSynthesis.getVoices().length > 0) {
+        populateVoiceOptions();
+    }
 </script>
 
 <script>
-    window.onload = function() {
+
+
+function tallenna_aani() {
+        var selectedVoice = document.querySelector('input[name="voiceOption"]:checked').value;
+        localStorage.setItem('selectedVoiceType', selectedVoice);
+    }
+
+    window.onload = function () {
+        fetch('http://localhost:3000/rss')
+            .then(response => response.json())
+            .then(data => {
+                const mainContainer = document.querySelector('.main-container');
+                data.forEach(item => {
+                    const section = document.createElement('section');
+                    section.className = 'news-container';
+
+                    const div = document.createElement('div');
+
+                    const h2 = document.createElement('h2');
+                    h2.textContent = item.title;
+
+                    const p = document.createElement('p');
+                    p.textContent = item.contentSnippet || item.content || '';
+
+                    div.appendChild(h2);
+                    div.appendChild(p);
+                    section.appendChild(div);
+                    mainContainer.appendChild(section);
+                });
+            })
+            .catch(error => console.error('Error:', error));
+    };
+</script>
+
+<script>
+    window.onload = function () {
         fetch('http://localhost:3000/rss')
             .then(response => response.json())
             .then(data => {
                 const mainContainer = document.querySelector('.main-container');
                 const voices = window.speechSynthesis.getVoices();
-    
+
                 data.forEach((item, index) => {
                     const section = document.createElement('section');
                     section.className = 'news-container';
-    
+
                     const div = document.createElement('div');
-    
+
                     const h2 = document.createElement('h2');
                     h2.textContent = item.title;
-    
+
                     const p = document.createElement('p');
                     p.textContent = item.contentSnippet || item.content || '';
-    
+
                     const button = document.createElement('button');
                     button.textContent = 'Kuuntele';
-                    button.onclick = function() {
+                    button.onclick = function () {
                         const utterance1 = new SpeechSynthesisUtterance(item.title);
                         const utterance2 = new SpeechSynthesisUtterance(item.contentSnippet || item.content || '');
                         // Valitse ääni; tässä esimerkissä valitaan äänet perustuen indeksiin modulo 4
 
                         utterance2.voice = voices[index % 4];
                         speechSynthesis.speak(utterance1)
-                        
+
                         utterance1.voice = voices[index % 4]; // Vaihda ääntä jokaiselle uutiselle
                         speechSynthesis.speak(utterance2);
-                        
+
                     };
-    
+
                     div.appendChild(h2);
                     div.appendChild(p);
                     div.appendChild(button);
@@ -166,6 +230,4 @@ window.onload = function() {
             })
             .catch(error => console.error('Error:', error));
     };
-    </script>
-
-
+</script>
