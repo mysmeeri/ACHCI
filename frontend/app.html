@@ -69,6 +69,17 @@
             background-color: #f4f0f0;
             margin-bottom: 20px;
         }
+
+        #saveMessage {
+            color: rgb(243, 26, 134);
+            font-size: 16px;
+            margin-top: 10px;
+            text-align: center;
+            opacity: 0;
+            transition: opacity 1s ease-out;
+            visibility: hidden;
+
+        }
     </style>
 
 </head>
@@ -95,12 +106,14 @@
     <main class="main-container">
 
 
+
         <div class="news-container">
             <h2>Choose a voice type:</h2>
 
             <div id="voiceOptions"> </div>
             <br>
             <button onclick=tallenna_aani()>Save</button>
+            <div id="saveMessage"></div>
         </div>
 
         </div>
@@ -115,10 +128,10 @@
     function populateVoiceOptions() {
         var voices = speechSynthesis.getVoices();
         var voiceOptionsContainer = document.getElementById('voiceOptions');
+        var savedVoiceName = localStorage.getItem('selectedVoiceType') || 'Microsoft Mark - English (United States)'; // Default to Microsoft Mark if no voice saved
         voiceOptionsContainer.innerHTML = ''; // Clear previous options
 
         voices.forEach(voice => {
-            // Check for specific voice names
             if (voice.name === "Microsoft Mark - English (United States)" || voice.name === "Microsoft Zira - English (United States)") {
                 var label = document.createElement('label');
                 var radioInput = document.createElement('input');
@@ -127,13 +140,13 @@
                 radioInput.name = 'voiceOption';
                 radioInput.value = voice.name;
 
+                // Valitsee toisen äänistä default ääneksi
+                if (voice.name === savedVoiceName) {
+                    radioInput.checked = true;
+                }
+
                 label.htmlFor = radioInput.id;
-                if (voice.name.includes("Mark")) {
-                    label.textContent = "Male voice"
-                }
-                if (voice.name.includes("Zira")) {
-                    label.textContent = "Female voice";
-                }
+                label.textContent = voice.name.includes("Mark") ? "Male voice" : "Female voice";
 
                 voiceOptionsContainer.appendChild(radioInput);
                 voiceOptionsContainer.appendChild(label);
@@ -149,76 +162,83 @@
     if (speechSynthesis.getVoices().length > 0) {
         populateVoiceOptions();
     }
-</script>
-
-<script>
 
 
-function tallenna_aani() {
+
+    //tämä funktio tallentaa käytettävän äänen
+    function tallenna_aani() {
         var selectedVoice = document.querySelector('input[name="voiceOption"]:checked').value;
         localStorage.setItem('selectedVoiceType', selectedVoice);
+        updateVoiceForAllPlayers(selectedVoice); // päivittää äänen kaikkiin kuuntelijoihin
+
+        // Kertoo käyttäjälle että valinta tallennettu
+        var messageDiv = document.getElementById('saveMessage');
+        messageDiv.textContent = 'Choice saved!'; // tämä teksti näkyy käyttäjälle
+        messageDiv.style.visibility = 'visible'; // Make it visible
+        messageDiv.style.opacity = 1
+
+        //piilottaa tekstin
+        setTimeout(function () {
+            messageDiv.style.opacity = 0;
+        }, 1500);
+
+
+
     }
 
+    //updatee valinnan
+    function updateVoiceForAllPlayers(voiceName) {
+        const buttons = document.querySelectorAll('.listen-button');
+        buttons.forEach(button => {
+            button.onclick = function () {
+                playVoice(this.dataset.title, this.dataset.content, voiceName);
+            };
+        });
+    }
+
+    //lukee 
+    function playVoice(title, content, voiceName) {
+        const utterance1 = new SpeechSynthesisUtterance(title);
+        const utterance2 = new SpeechSynthesisUtterance(content);
+        const voices = speechSynthesis.getVoices();
+        const selectedVoice = voices.find(voice => voice.name === voiceName);
+        if (selectedVoice) {
+            utterance1.voice = selectedVoice;
+            utterance2.voice = selectedVoice;
+        }
+
+        speechSynthesis.cancel(); //jos lukee jotain toista uutista ja painaa tästä luku keskeytyy ja alkaa alusta siitä mistä painoit "kuuntele"
+        speechSynthesis.speak(utterance1);
+        speechSynthesis.speak(utterance2);
+    }
+
+    //hakee uutiset
     window.onload = function () {
         fetch('http://localhost:3000/rss')
             .then(response => response.json())
             .then(data => {
                 const mainContainer = document.querySelector('.main-container');
-                data.forEach(item => {
+                const savedVoiceName = localStorage.getItem('selectedVoiceType');
+
+                data.forEach((item) => {
                     const section = document.createElement('section');
                     section.className = 'news-container';
 
                     const div = document.createElement('div');
-
                     const h2 = document.createElement('h2');
                     h2.textContent = item.title;
 
                     const p = document.createElement('p');
-                    p.textContent = item.contentSnippet || item.content || '';
-
-                    div.appendChild(h2);
-                    div.appendChild(p);
-                    section.appendChild(div);
-                    mainContainer.appendChild(section);
-                });
-            })
-            .catch(error => console.error('Error:', error));
-    };
-</script>
-
-<script>
-    window.onload = function () {
-        fetch('http://localhost:3000/rss')
-            .then(response => response.json())
-            .then(data => {
-                const mainContainer = document.querySelector('.main-container');
-                const voices = window.speechSynthesis.getVoices();
-
-                data.forEach((item, index) => {
-                    const section = document.createElement('section');
-                    section.className = 'news-container';
-
-                    const div = document.createElement('div');
-
-                    const h2 = document.createElement('h2');
-                    h2.textContent = item.title;
-
-                    const p = document.createElement('p');
-                    p.textContent = item.contentSnippet || item.content || '';
+                    p.textContent = item.contentSnippet || item.content;
 
                     const button = document.createElement('button');
-                    button.textContent = 'Kuuntele';
+                    button.className = 'listen-button';
+                    button.textContent = 'Listen';
+                    button.dataset.title = item.title;
+                    button.dataset.content = item.contentSnippet || item.content;
+
                     button.onclick = function () {
-                        const utterance1 = new SpeechSynthesisUtterance(item.title);
-                        const utterance2 = new SpeechSynthesisUtterance(item.contentSnippet || item.content || '');
-                        // Valitse ääni; tässä esimerkissä valitaan äänet perustuen indeksiin modulo 4
-
-                        utterance2.voice = voices[index % 4];
-                        speechSynthesis.speak(utterance1)
-
-                        utterance1.voice = voices[index % 4]; // Vaihda ääntä jokaiselle uutiselle
-                        speechSynthesis.speak(utterance2);
-
+                        playVoice(this.dataset.title, this.dataset.content, savedVoiceName);
                     };
 
                     div.appendChild(h2);
@@ -227,6 +247,7 @@ function tallenna_aani() {
                     section.appendChild(div);
                     mainContainer.appendChild(section);
                 });
+                updateVoiceForAllPlayers(savedVoiceName); // Ensure all buttons are initialized correctly
             })
             .catch(error => console.error('Error:', error));
     };
