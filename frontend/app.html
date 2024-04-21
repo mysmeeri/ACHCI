@@ -215,7 +215,7 @@
 
     //hakee uutiset
     window.onload = function () {
-        fetch('https://achci.onrender.com/rss')
+        fetch('https://achci.onrender.com/rss') //jos haluaa lokaalisti kokeilla toimintaa niin tähän "http://localhost:3000/rss"
             .then(response => response.json())
             .then(data => {
                 const mainContainer = document.querySelector('.main-container');
