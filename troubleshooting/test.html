@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Speech Synthesis Troubleshooting</title>
+<script>
+window.onload = function() {
+    var voices = [];
+
+    function populateVoiceList() {
+        voices = speechSynthesis.getVoices();
+        var voiceSelect = document.getElementById('voiceSelect');
+        voices.forEach(voice => {
+            var option = document.createElement('option');
+            option.textContent = voice.name + ' (' + voice.lang + ')';
+            voiceSelect.appendChild(option);
+        });
+    }
+
+    if ('speechSynthesis' in window) {
+        populateVoiceList();
+        if (speechSynthesis.onvoiceschanged !== undefined) {
+            speechSynthesis.onvoiceschanged = populateVoiceList;
+        }
+    } else {
+        alert('Speech synthesis not supported in this browser.');
+        document.getElementById('speakButton').disabled = true;
+    }
+
+    document.getElementById('speakButton').addEventListener('click', function(){
+        var textInput = document.getElementById('textInput').value;
+        var voiceSelect = document.getElementById('voiceSelect');
+        var selectedOption = voiceSelect.selectedOptions[0].textContent;
+        speak(textInput, selectedOption);
+    });
+
+    function speak(text, voiceName) {
+        var utterance = new SpeechSynthesisUtterance(text);
+        var selectedVoice = voices.find(voice => voice.name + ' (' + voice.lang + ')' === voiceName);
+        if (selectedVoice) {
+            utterance.voice = selectedVoice;
+        } else {
+            console.warn('Selected voice not available. Using default.');
+        }
+        speechSynthesis.speak(utterance);
+    }
+};
+</script>
+</head>
+<body>
+<h1>Speech Synthesis Troubleshooting</h1>
+<p>Select a voice from the list and enter text to speak:</p>
+<select id="voiceSelect"></select><br><br>
+<input type="text" id="textInput" placeholder="Enter text to speak" size="50"><br><br>
+<button id="speakButton">Speak</button>
+</body>
+</html>
