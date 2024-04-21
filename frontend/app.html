@@ -125,46 +125,61 @@
 </body>
 
 <script>
-    //tämä funktio tekee radiobuttonit uutisten päälle
     function populateVoiceOptions() {
         var voices = speechSynthesis.getVoices();
         var voiceOptionsContainer = document.getElementById('voiceOptions');
         var savedVoiceName = localStorage.getItem('selectedVoiceType') || 'Microsoft Mark - English (United States)'; // Default to Microsoft Mark if no voice saved
         voiceOptionsContainer.innerHTML = ''; // Clear previous options
 
+        var maleVoiceAdded = false;
+        var femaleVoiceAdded = false;
+
         voices.forEach(voice => {
-            if (voice.name === "Microsoft Mark - English (United States)" || voice.name === "Microsoft Zira - English (United States)") {
-                var label = document.createElement('label');
-                var radioInput = document.createElement('input');
-                radioInput.type = 'radio';
-                radioInput.id = voice.name;
-                radioInput.name = 'voiceOption';
-                radioInput.value = voice.name;
+            if ((voice.name.includes("Mark") || voice.name.includes("David") || voice.name.includes("George")) && !maleVoiceAdded) {
+                maleVoiceAdded = true;
+                createVoiceOption(voice.name, 'Male Voice', voiceOptionsContainer, savedVoiceName);
+            }
 
-                // Valitsee toisen äänistä default ääneksi
-                if (voice.name === savedVoiceName) {
-                    radioInput.checked = true;
-                }
-
-                label.htmlFor = radioInput.id;
-                label.textContent = voice.name.includes("Mark") ? "Male voice" : "Female voice";
-
-                voiceOptionsContainer.appendChild(radioInput);
-                voiceOptionsContainer.appendChild(label);
-                voiceOptionsContainer.appendChild(document.createElement('br'));
+            if ((voice.name.includes("Zira") || voice.name.includes("Hazel") || voice.name.includes("Susan")) && !femaleVoiceAdded) {
+                femaleVoiceAdded = true;
+                createVoiceOption(voice.name, 'Female Voice', voiceOptionsContainer, savedVoiceName);
             }
         });
+
+        //tämä listaa kaikki mahdolliset valittavat äänet
+        if (!maleVoiceAdded || !femaleVoiceAdded) {
+            voiceOptionsContainer.innerHTML = ''; // Clear previous options
+            voices.filter(voice => voice.lang.includes('en-')).forEach(voice => {
+                createVoiceOption(voice.name, voice.name, voiceOptionsContainer, savedVoiceName);
+            });
+        }
     }
 
-    // Use the onvoiceschanged event to populate options
-    speechSynthesis.onvoiceschanged = populateVoiceOptions;
+    function createVoiceOption(voiceName, labelContent, container, savedVoiceName) {
+        var label = document.createElement('label');
+        var radioInput = document.createElement('input');
+        radioInput.type = 'radio';
+        radioInput.id = voiceName;
+        radioInput.name = 'voiceOption';
+        radioInput.value = voiceName;
+        if (voiceName === savedVoiceName) {
+            radioInput.checked = true;
+        }
 
-    // Populate immediately if voices are already loaded
+        label.htmlFor = radioInput.id;
+        label.textContent = labelContent;
+
+        container.appendChild(radioInput);
+        container.appendChild(label);
+        container.appendChild(document.createElement('br'));
+    }
+
+    // Ensure voices are loaded before populating options
     if (speechSynthesis.getVoices().length > 0) {
         populateVoiceOptions();
+    } else {
+        speechSynthesis.onvoiceschanged = populateVoiceOptions;
     }
-
-
 
     //tämä funktio tallentaa käytettävän äänen
     function tallenna_aani() {
@@ -182,8 +197,6 @@
         setTimeout(function () {
             messageDiv.style.opacity = 0;
         }, 1500);
-
-
 
     }
 
