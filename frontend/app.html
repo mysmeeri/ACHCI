@@ -82,31 +82,12 @@
 
         }
 
-        /* Additional CSS for fixed voice options container */
-        #voiceOptionsContainer {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            position: fixed;
-            right: 100px;
-            top: 200px;
-            width: 200px;
-            background-color: white;
-            padding: 10px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-            z-index: 1000;
-            overflow: auto;
-        }
-
-        .voice-inside {
+        /**kaksi ekaa containeria ennenkuin uutiset alkaa*/
+        .voice-container {
             padding: 20px;
             background-color: #f4f0f0;
             margin-bottom: 20px;
             width: 90%;
-            max-width: 100%;
-            /* Ensures it doesn't overflow */
-            box-sizing: border-box;
-            /* Include padding and border in the width */
         }
     </style>
 
@@ -131,23 +112,18 @@
 
 
 
-    <div id="voiceOptionsContainer">
-        <div class="voice-inside">
-            <p>Choose either female or male voice type to read news for you!</p>
-        </div>
-        <div class="voice-inside">
-            <h2>Choose a voice type:</h2>
-            <div id="voiceOptions"></div>
-            <br>
-            <button onclick="tallenna_aani()">Save</button>
-            <div id="saveMessage"></div>
-        </div>
-    </div>
-
-
-    <!-- tähän listautuu uutiset -->
     <main class="main-container">
 
+
+<div class="voice-container"><p>Tähän voisi tulla jotain tekstiä, esim, miten sovellusta käytetään.</p></div>
+        <div class="voice-container">
+            <h2>Choose a voice type:</h2>
+
+            <div id="voiceOptions"> </div>
+            <br>
+            <button onclick=tallenna_aani()>Save</button>
+            <div id="saveMessage"></div>
+        </div>
 
         </div>
 
