@@ -215,7 +215,7 @@
 
     //hakee uutiset
     window.onload = function () {
-        fetch('http://localhost:3000/rss')
+        fetch('https://achci.onrender.com/rss')
             .then(response => response.json())
             .then(data => {
                 const mainContainer = document.querySelector('.main-container');
