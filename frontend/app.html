@@ -115,7 +115,7 @@
     <main class="main-container">
 
 
-<div class="voice-container"><p>Tähän voisi tulla jotain tekstiä, esim, miten sovellusta käytetään.</p></div>
+<div class="voice-container"><>Tähän voisi tulla jotain tekstiä, esim, miten sovellusta käytetään.</p></div>
         <div class="voice-container">
             <h2>Choose a voice type:</h2>
 
@@ -157,7 +157,9 @@
         //tämä listaa kaikki mahdolliset valittavat äänet
         if (!maleVoiceAdded || !femaleVoiceAdded) {
             voiceOptionsContainer.innerHTML = ''; // Clear previous options
-            voices.filter(voice => voice.lang.includes('en-')).forEach(voice => {
+            voices.filter(voice => voice.lang.includes('en-'))
+            .slice(0,10) //valitaan vain 10 ensimmäistä ääntä näytettäväksi, näitä saattaa muuten tulla ihan saakelsti
+            .forEach(voice => {
                 createVoiceOption(voice.name, voice.name, voiceOptionsContainer, savedVoiceName);
             });
         }
