@@ -115,14 +115,67 @@
     <main class="main-container">
 
 
-<div class="voice-container"><p>Tähän voisi tulla jotain tekstiä, esim, miten sovellusta käytetään.</p></div>
+        <div class="voice-container">
+            <p>Tähän voisi tulla jotain tekstiä, esim, miten sovellusta käytetään.</p>
+        </div>
         <div class="voice-container">
             <h2>Choose a voice type:</h2>
 
-            <div id="voiceOptions"> </div>
+            <div id="voiceOptions">
+                <input type='radio' id='voiceFemale' name='voiceOption' value='voiceFemale'>
+                <label for="voiceFemale">Female voice</label><br>
+                <input type='radio' id='voiceMale' name='voiceOption' value='voiceMale'>
+                <label for="voiceMale">Male voice</label><br>
+            </div>
             <br>
-            <button onclick=tallenna_aani()>Save</button>
+            <button onclick=saveVoiceOption()>Save</button>
             <div id="saveMessage"></div>
+        </div>
+
+
+        <div class="news-container" id="u1">
+            <h2>Japanese yen strengthens sharply after hitting 160 against dollar for the first time since 1990</h2>
+            <p>The Japanese yen weakened to 160 against the U.S. dollar in Monday morning trading in Asia.</p>
+            <button class="listen-button">Listen</button>
+            <div style="text-align: right;">
+                <a href="https://www.cnbc.com/2024/04/29/asia-markets.html" target="_blank">Source</a>
+            </div>
+        </div>
+
+        <div class="news-container" id="u2">
+            <h2>World’s largest sovereign wealth fund says green backlash is a chance for it to 'phase in' — not out</h2>
+            <p>Norway's $1.6 trillion sovereign wealth fund says it will continue to advocate for investments based on ESG factors.</p>
+            <button class="listen-button">Listen</button>
+            <div style="text-align: right;">
+                <a href="https://www.cnbc.com/2024/04/29/worlds-largest-wealth-fund-says-it-may-benefit-from-esg-backlash.html" target="_blank">Source</a>
+            </div>
+        </div>
+
+        <div class="news-container" id="u3">
+            <h2>Musk makes surprise visit to Beijing as Tesla's China-made cars pass data security rules</h2>
+            <p>Local authorities removed restrictions on Tesla cars after the company passed China's data security requirements, the automaker said Sunday.</p>
+            <button class="listen-button">Listen</button>
+            <div style="text-align: right;">
+                <a href="https://www.nbcnews.com/news/world/musk-makes-surprise-visit-beijing-teslas-china-made-cars-pass-data-sec-rcna149727" target="_blank">Source</a>
+            </div>
+        </div>
+
+        <div class="news-container" id="u4">
+            <h2>Buy this 'dirt-cheap,' top-rated dividend stock with a 4% yield, Morningstar says</h2>
+            <p>The stock is "deeply undervalued" right now, according to the financial services firm, but it's bullish on it for the long term.</p>
+            <button class="listen-button">Listen</button>
+            <div style="text-align: right;">
+                <a href="https://www.cnbc.com/2024/04/29/buy-this-dirt-cheap-top-dividend-stock-with-a-4percent-yield-morningstar.html" target="_blank">Source</a>
+            </div>
+        </div>
+
+        <div class="news-container" id="u5">
+            <h2>Only the U.S. has the ability to break the cycle of violence in Gaza, Egyptian foreign minister says</h2>
+            <p>Egypt's Foreign Minister Sameh Shoukry called on the U.S. to leverage its influence over Israel to prevent further bloodshed in Gaza.</p>
+            <button class="listen-button">Listen</button>
+            <div style="text-align: right;">
+                <a href="https://www.cnbc.com/2024/04/29/only-us-has-the-ability-to-break-the-cycle-of-gaza-violence-egyptian-foreign-minister.html" target="_blank">Source</a>
+            </div>
         </div>
 
         </div>
@@ -133,146 +186,54 @@
 </body>
 
 <script>
-    function populateVoiceOptions() {
-        var voices = speechSynthesis.getVoices();
-        var voiceOptionsContainer = document.getElementById('voiceOptions');
-        var savedVoiceName = localStorage.getItem('selectedVoiceType') || 'Microsoft Mark - English (United States)'; // Default to Microsoft Mark if no voice saved
-        voiceOptionsContainer.innerHTML = ''; // Clear previous options
-
-        var maleVoiceAdded = false;
-        var femaleVoiceAdded = false;
-
-        voices.forEach(voice => {
-            if ((voice.name.includes("Mark") || voice.name.includes("David") || voice.name.includes("George")) && !maleVoiceAdded) {
-                maleVoiceAdded = true;
-                createVoiceOption(voice.name, 'Male Voice', voiceOptionsContainer, savedVoiceName);
+    // Tallentaa äänivalinnan selaimen session storageen
+    function saveVoiceOption() {
+        const voiceOptions = document.getElementsByName('voiceOption');
+        for (let option of voiceOptions) {
+            if (option.checked) {
+                sessionStorage.setItem('selectedVoice', option.value);
+                showSaveMessage();
+                break;
             }
-
-            if ((voice.name.includes("Zira") || voice.name.includes("Hazel") || voice.name.includes("Susan")) && !femaleVoiceAdded) {
-                femaleVoiceAdded = true;
-                createVoiceOption(voice.name, 'Female Voice', voiceOptionsContainer, savedVoiceName);
-            }
-        });
-
-        //tämä listaa kaikki mahdolliset valittavat äänet
-        if (!maleVoiceAdded || !femaleVoiceAdded) {
-            voiceOptionsContainer.innerHTML = ''; // Clear previous options
-            voices.filter(voice => voice.lang.includes('en-'))
-            .slice(0,10) //valitaan vain 10 ensimmäistä ääntä näytettäväksi, näitä saattaa muuten tulla ihan saakelsti
-            .forEach(voice => {
-                createVoiceOption(voice.name, voice.name, voiceOptionsContainer, savedVoiceName);
-            });
         }
     }
 
-    function createVoiceOption(voiceName, labelContent, container, savedVoiceName) {
-        var label = document.createElement('label');
-        var radioInput = document.createElement('input');
-        radioInput.type = 'radio';
-        radioInput.id = voiceName;
-        radioInput.name = 'voiceOption';
-        radioInput.value = voiceName;
-        if (voiceName === savedVoiceName) {
-            radioInput.checked = true;
+    // Funktio äänen tallentamisen näyttämiseksi
+    function showSaveMessage() {
+        const saveMessage = document.getElementById('saveMessage');
+        saveMessage.textContent = 'Voice option saved!';
+        saveMessage.style.opacity = 1;
+        saveMessage.style.visibility = 'visible';
+        setTimeout(() => {
+            saveMessage.style.opacity = 0;
+            saveMessage.style.visibility = 'hidden';
+        }, 3000);
+    }
+
+    //Tämä funktio lukee artikkelit
+    function playVoice(articleId) {
+        const selectedVoice = sessionStorage.getItem('selectedVoice');
+        let audioFileName;
+        if (selectedVoice === 'voiceMale') {
+            audioFileName = 'voicefiles/' + articleId + '_daniel.mp3';  // Updated path
+        } else if (selectedVoice === 'voiceFemale') {
+            audioFileName = 'voicefiles/' + articleId + '_charlotte.mp3';  // Updated path
+        } else {
+            alert('Please select and save a voice option first.');
+            return;
         }
-
-        label.htmlFor = radioInput.id;
-        label.textContent = labelContent;
-
-        container.appendChild(radioInput);
-        container.appendChild(label);
-        container.appendChild(document.createElement('br'));
+        const audio = new Audio(audioFileName);
+        audio.play();
     }
 
-    // Ensure voices are loaded before populating options
-    if (speechSynthesis.getVoices().length > 0) {
-        populateVoiceOptions();
-    } else {
-        speechSynthesis.onvoiceschanged = populateVoiceOptions;
-    }
-
-    //tämä funktio tallentaa käytettävän äänen
-    function tallenna_aani() {
-        var selectedVoice = document.querySelector('input[name="voiceOption"]:checked').value;
-        localStorage.setItem('selectedVoiceType', selectedVoice);
-        updateVoiceForAllPlayers(selectedVoice); // päivittää äänen kaikkiin kuuntelijoihin
-
-        // Kertoo käyttäjälle että valinta tallennettu
-        var messageDiv = document.getElementById('saveMessage');
-        messageDiv.textContent = 'Choice saved!'; // tämä teksti näkyy käyttäjälle
-        messageDiv.style.visibility = 'visible'; // Make it visible
-        messageDiv.style.opacity = 1
-
-        //piilottaa tekstin
-        setTimeout(function () {
-            messageDiv.style.opacity = 0;
-        }, 1500);
-
-    }
-
-    //updatee valinnan
-    function updateVoiceForAllPlayers(voiceName) {
-        const buttons = document.querySelectorAll('.listen-button');
-        buttons.forEach(button => {
-            button.onclick = function () {
-                playVoice(this.dataset.title, this.dataset.content, voiceName);
-            };
-        });
-    }
-
-    //lukee 
-    function playVoice(title, content, voiceName) {
-        const utterance1 = new SpeechSynthesisUtterance(title);
-        const utterance2 = new SpeechSynthesisUtterance(content);
-        const voices = speechSynthesis.getVoices();
-        const selectedVoice = voices.find(voice => voice.name === voiceName);
-        if (selectedVoice) {
-            utterance1.voice = selectedVoice;
-            utterance2.voice = selectedVoice;
-        }
-
-        speechSynthesis.cancel(); //jos lukee jotain toista uutista ja painaa tästä luku keskeytyy ja alkaa alusta siitä mistä painoit "kuuntele"
-        speechSynthesis.speak(utterance1);
-        speechSynthesis.speak(utterance2);
-    }
-
-    //hakee uutiset
+    // "Kuuntele"-napin toiminnallisuus
     window.onload = function () {
-        fetch('https://achci.onrender.com/rss') //jos haluaa lokaalisti kokeilla toimintaa niin tähän "http://localhost:3000/rss"
-            .then(response => response.json())
-            .then(data => {
-                const mainContainer = document.querySelector('.main-container');
-                const savedVoiceName = localStorage.getItem('selectedVoiceType');
-
-                data.forEach((item) => {
-                    const section = document.createElement('section');
-                    section.className = 'news-container';
-
-                    const div = document.createElement('div');
-                    const h2 = document.createElement('h2');
-                    h2.textContent = item.title;
-
-                    const p = document.createElement('p');
-                    p.textContent = item.contentSnippet || item.content;
-
-                    const button = document.createElement('button');
-                    button.className = 'listen-button';
-                    button.textContent = 'Listen';
-                    button.dataset.title = item.title;
-                    button.dataset.content = item.contentSnippet || item.content;
-
-                    button.onclick = function () {
-                        playVoice(this.dataset.title, this.dataset.content, savedVoiceName);
-                    };
-
-                    div.appendChild(h2);
-                    div.appendChild(p);
-                    div.appendChild(button);
-                    section.appendChild(div);
-                    mainContainer.appendChild(section);
-                });
-                updateVoiceForAllPlayers(savedVoiceName); // Ensure all buttons are initialized correctly
-            })
-            .catch(error => console.error('Error:', error));
+        const listenButtons = document.querySelectorAll('.listen-button');
+        listenButtons.forEach(button => {
+            button.addEventListener('click', function () {
+                const articleId = this.parentElement.id; 
+                playVoice(articleId);
+            });
+        });
     };
 </script>
