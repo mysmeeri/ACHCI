@@ -194,6 +194,8 @@
 </body>
 
 <script>
+    let currentAudio = null; // globaali muuttuja jolla pidetään kirjaa siitä mikä mp3-ääni soi
+
     // Tallentaa äänivalinnan selaimen session storageen
     function saveVoiceOption() {
         const voiceOptions = document.getElementsByName('voiceOption');
@@ -220,6 +222,11 @@
 
     //Tämä funktio lukee artikkelit
     function playVoice(articleId) {
+        if (currentAudio){
+            currentAudio.pause(); //lopettaa senhetkisen audion toistamisen
+            currentAudio.currentTime = 0; // resettaa audio playback kohdan
+        }
+
         const selectedVoice = sessionStorage.getItem('selectedVoice');
         let audioFileName;
         if (selectedVoice === 'voiceMale') {
@@ -230,8 +237,8 @@
             alert('Please select and save a voice option first.');
             return;
         }
-        const audio = new Audio(audioFileName);
-        audio.play();
+        currentAudio = new Audio(audioFileName);
+        currentAudio.play();
     }
 
     // "Kuuntele"-napin toiminnallisuus
