@@ -1,3 +1,5 @@
+//HUOM!!! tämä ei enää käytössä, poistettu live rss feed käytöstä
+
 const express = require('express');
 const Parser = require('rss-parser');
 const cors = require('cors');

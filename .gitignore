@@ -2,3 +2,4 @@ node_modules/*
 backend/appVanha.js
 frontend/appVanha.html
 uutiset.txt
+troubleshooting/*
